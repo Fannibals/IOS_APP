@@ -143,10 +143,9 @@
                                                     </subviews>
                                                 </stackView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="7" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uas-og-VFZ">
-                                                    <rect key="frame" x="310" y="11" width="40" height="40"/>
+                                                    <rect key="frame" x="310" y="11" width="40" height="42"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="40" id="I1s-z8-1jx"/>
-                                                        <constraint firstAttribute="height" constant="40" id="mnw-33-qVe"/>
                                                     </constraints>
                                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                                                     <color key="textColor" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -93,7 +93,7 @@ extension GoalsVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         deleteAction.backgroundColor = UIColor.red
-        addAction.backgroundColor = UIColor.orange
+        addAction.backgroundColor = UIColor.orange 
         return [deleteAction, addAction]
     }
 }
