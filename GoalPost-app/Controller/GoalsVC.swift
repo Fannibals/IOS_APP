@@ -15,21 +15,23 @@ class GoalsVC: UIViewController {
     
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var showRemoveView: UIView!
     
     var goals: [Goal] = []
+    var goalToDel : Goal?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        addtap()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.isHidden = false 
+        tableView.isHidden = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.fetchCoreDataObject()
-        
+        tableView.reloadData()
     }
     
     func fetchCoreDataObject() {
@@ -37,24 +39,47 @@ class GoalsVC: UIViewController {
             if complete {
                 if goals.count >= 1{
                     tableView.isHidden = false
-                    tableView.reloadData()
                 } else {
                     tableView.isHidden = true
                 }
             }
         }
     }
+    
+    func addtap() {
+        let tap = UITapGestureRecognizer(target: self, action:#selector(removeViewDisappear))
+        tap.numberOfTapsRequired = 2
+        self.showRemoveView.addGestureRecognizer(tap)
+    }
 
 
     @IBAction func addGoalBtnPressed(_ sender: Any) {
         guard let createGoalVC = storyboard?.instantiateViewController(withIdentifier: "CreateGoalVC") else {return}
         presentDetail(createGoalVC)
+        self.showRemoveView.isHidden = true
     }
     
+    
+    @IBAction func undoBtnPressed(_ sender: Any) {
+        // undo the delete
+        guard let managedContext = appDelegate?.persistentContainer.viewContext else {return}
+        managedContext.undoManager?.undo()
+        self.showRemoveView.isHidden = true
+        fetchCoreDataObject()
+        tableView.reloadData()
+    }
+    
+    @objc func removeViewDisappear(sender: UITapGestureRecognizer) {
+        self.showRemoveView.isHidden = true
+    }
     
 }
 
 extension GoalsVC: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -81,11 +106,14 @@ extension GoalsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let deleteAction = UITableViewRowAction(style: .destructive, title: "DELETE") { (rowAction, indexPath) in
+            self.showRemoveView.isHidden = false
+            
             self.removeGoal(indexPath: indexPath)
             self.fetchCoreDataObject()
             tableView.deleteRows(at: [indexPath], with: .automatic)
+
+            
         }
-        
         
         let addAction = UITableViewRowAction(style: .normal, title: "add 1") { (rowAction, indexPath) in
             self.setProgress(indexPath: indexPath)
@@ -122,6 +150,7 @@ extension GoalsVC {
     
     func removeGoal(indexPath: IndexPath) {
         guard let managedContext = appDelegate?.persistentContainer.viewContext else {return}
+        managedContext.undoManager = UndoManager()
         managedContext.delete(goals[indexPath.row])
         
         do {
@@ -134,11 +163,11 @@ extension GoalsVC {
     
     func fetch(completion: (_ complete: Bool) -> ()) {
         guard let managedContext = appDelegate?.persistentContainer.viewContext else {return}
-        
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Goal")
+    
+        let fetchRequest = NSFetchRequest<Goal>(entityName: "Goal")
         
         do {
-            goals = try managedContext.fetch(fetchRequest) as! [Goal]
+            goals = try managedContext.fetch(fetchRequest)
             print("Successfully fetched data")
             completion(true)
         } catch {
